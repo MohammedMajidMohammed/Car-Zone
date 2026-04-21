@@ -9,7 +9,7 @@
     --card-bg: rgba(30, 41, 59, 0.7);
     --glass-border: rgba(255, 255, 255, 0.1);
     --text-main: #f8fafc;
-    --text-muted: #94a3b8;
+    --text-muted: #cbd5e1;
     --shadow-main: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
     --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -127,6 +127,14 @@ h1, h2, h3, h4, .navbar-brand {
     color: white !important;
     font-size: 1.1rem;
     padding-left: 15px;
+}
+
+.search-wrapper input::placeholder {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.search-wrapper i {
+    color: var(--primary-light) !important;
 }
 
 .search-wrapper input:focus {
@@ -349,7 +357,16 @@ h1, h2, h3, h4, .navbar-brand {
 footer {
     background: rgba(15, 23, 42, 0.9);
     border-top: 1px solid var(--glass-border);
-    padding: 40px 0;
+    padding: 60px 0;
+}
+
+footer a, footer p {
+    color: #cbd5e1 !important;
+    transition: var(--transition);
+}
+
+footer a:hover {
+    color: white !important;
 }
 
 @media (max-width: 768px) {
