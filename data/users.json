@@ -1,0 +1,20 @@
+[
+    {
+        "id": 1776339254623,
+        "username": "Student",
+        "email": "student@univ.edu",
+        "password": "password123"
+    },
+    {
+        "id": 1776340192841,
+        "username": "testuser",
+        "email": "test@example.com",
+        "password": "password123"
+    },
+    {
+        "id": 1776346364853,
+        "username": "Admin",
+        "email": "admin@carzon.com",
+        "password": "12345678"
+    }
+]

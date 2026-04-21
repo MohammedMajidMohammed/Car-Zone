@@ -1,0 +1,56 @@
+[
+    {
+        "id": 1,
+        "name": "Tesla Model S Plaid",
+        "price": 90000,
+        "brand": "Tesla",
+        "year": 2023,
+        "image": "images/tesla.png",
+        "description": "The Tesla Model S is an all-electric luxury sedan with high performance and long range."
+    },
+    {
+        "id": 2,
+        "name": "BMW M4 Competition",
+        "price": 78600,
+        "brand": "BMW",
+        "year": 2022,
+        "image": "images/bmw.png",
+        "description": "The BMW M4 is a high-performance version of the BMW 4 Series coupes and convertibles."
+    },
+    {
+        "id": 3,
+        "name": "Audi R8 Spyder",
+        "price": 155000,
+        "brand": "Audi",
+        "year": 2023,
+        "image": "images/audi.png",
+        "description": "Uncompromising performance and open-air thrills in the legendary Audi R8."
+    },
+    {
+        "id": 4,
+        "name": "Mercedes G-Wagon",
+        "price": 139000,
+        "brand": "Mercedes",
+        "year": 2023,
+        "image": "images/mercedes.png",
+        "description": "The legendary G-Class SUV offers incomparable off-road capability and luxury."
+    },
+    {
+        "id": 5,
+        "name": "Porsche 911 GT3",
+        "price": 169700,
+        "brand": "Porsche",
+        "year": 2023,
+        "image": "images/porsche.png",
+        "description": "The 911 GT3 is a high-performance homologation model of the Porsche 911 sports car."
+    },
+    {
+        "id": 6,
+        "name": "Lexus LC 500 Hybrid",
+        "price": 95000,
+        "brand": "Lexus",
+        "year": 2022,
+        "image": "images/lexus.png",
+        "description": "Luxury coupe with a naturally aspirated V8 and stunning design."
+    }
+]
