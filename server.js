@@ -166,9 +166,3 @@ app.delete('/api/cars/:id', (req, res) => {
 // =======================
 app.use(express.static(__dirname));
 
-// =======================
-// Start Server
-// =======================
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-});
