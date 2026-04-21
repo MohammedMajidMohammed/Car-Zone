@@ -9,6 +9,10 @@ const app = express();
 
 const PORT = process.env.PORT || 8080;
 
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+});
+
 const imagesDir = path.join(__dirname, 'images');
 const dataDir = path.join(__dirname, 'data');
 
