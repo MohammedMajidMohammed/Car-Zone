@@ -6,26 +6,52 @@ const path = require('path');
 const multer = require('multer');
 
 const app = express();
-const PORT = 3000;
+
+const PORT = process.env.PORT || 3000;
+
+const imagesDir = path.join(__dirname, 'images');
+const dataDir = path.join(__dirname, 'data');
+
+if (!fs.existsSync(imagesDir)) {
+    fs.mkdirSync(imagesDir);
+}
+
+if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir);
+}
 
 // Multer Storage Configuration
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'images/');
+        cb(null, imagesDir);
     },
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         cb(null, uniqueSuffix + path.extname(file.originalname));
     }
 });
-const upload = multer({ storage: storage });
+
+const upload = multer({ storage });
 
 app.use(cors());
 app.use(bodyParser.json());
 
-const CARS_FILE = path.join(__dirname, 'data', 'cars.json');
-const USERS_FILE = path.join(__dirname, 'data', 'users.json');
+// ✅ ملفات الداتا
+const CARS_FILE = path.join(dataDir, 'cars.json');
+const USERS_FILE = path.join(dataDir, 'users.json');
 
+// ✅ إنشاء الملفات لو مش موجودة
+if (!fs.existsSync(CARS_FILE)) {
+    fs.writeFileSync(CARS_FILE, JSON.stringify([]));
+}
+
+if (!fs.existsSync(USERS_FILE)) {
+    fs.writeFileSync(USERS_FILE, JSON.stringify([]));
+}
+
+// =======================
+// Helpers
+// =======================
 const readData = (filePath) => {
     try {
         const data = fs.readFileSync(filePath, 'utf8');
@@ -39,7 +65,9 @@ const writeData = (filePath, data) => {
     fs.writeFileSync(filePath, JSON.stringify(data, null, 4), 'utf8');
 };
 
-
+// =======================
+// Auth APIs
+// =======================
 app.post('/api/register', (req, res) => {
     const { username, email, password } = req.body;
     const users = readData(USERS_FILE);
@@ -68,16 +96,21 @@ app.post('/api/login', (req, res) => {
     }
 });
 
-// File Upload Endpoint
+// =======================
+// Upload API
+// =======================
 app.post('/api/upload', upload.single('image'), (req, res) => {
     if (!req.file) {
         return res.status(400).json({ message: 'No file uploaded' });
     }
-    const filePath = `images/${req.file.filename}`;
-    res.json({ filePath: filePath });
+
+    const filePath = `/images/${req.file.filename}`;
+    res.json({ filePath });
 });
 
-
+// =======================
+// Cars APIs
+// =======================
 app.get('/api/cars', (req, res) => {
     const cars = readData(CARS_FILE);
     res.json(cars);
@@ -93,7 +126,8 @@ app.post('/api/cars', (req, res) => {
 
 app.get('/api/cars/:id', (req, res) => {
     const cars = readData(CARS_FILE);
-    const car = cars.find(c => c.id == req.params.id);
+    const car = cars.find(c => String(c.id) === String(req.params.id));
+
     if (car) res.json(car);
     else res.status(404).json({ message: 'Car not found' });
 });
@@ -101,7 +135,7 @@ app.get('/api/cars/:id', (req, res) => {
 app.put('/api/cars/:id', (req, res) => {
     const cars = readData(CARS_FILE);
     const index = cars.findIndex(c => String(c.id) === String(req.params.id));
-    
+
     if (index !== -1) {
         cars[index] = { ...cars[index], ...req.body };
         writeData(CARS_FILE, cars);
@@ -112,23 +146,25 @@ app.put('/api/cars/:id', (req, res) => {
 });
 
 app.delete('/api/cars/:id', (req, res) => {
-    console.log(`DELETE Request received for ID: ${req.params.id}`);
     let cars = readData(CARS_FILE);
-    const initialLength = cars.length;
     const filteredCars = cars.filter(c => String(c.id) !== String(req.params.id));
-    
-    if (initialLength !== filteredCars.length) {
-        console.log(`Successfully deleted car ID: ${req.params.id}`);
+
+    if (cars.length !== filteredCars.length) {
         writeData(CARS_FILE, filteredCars);
         res.json({ message: 'Car deleted successfully' });
     } else {
-        console.log(`Car ID: ${req.params.id} NOT FOUND for deletion`);
         res.status(404).json({ message: 'Car not found' });
     }
 });
 
+// =======================
+// Static Files
+// =======================
 app.use(express.static(__dirname));
 
+// =======================
+// Start Server
+// =======================
 app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`🚀 Server running on port ${PORT}`);
 });
