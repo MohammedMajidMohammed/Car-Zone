@@ -1,15 +1,38 @@
 /* 
-   CarZone - Full-Stack Logic (Upload Version)
-   Student Project: Car Showroom CRUD with File Uploads
+   CarZone - Premium Full-Stack Logic
+   Student Project: Car Showroom CRUD with Enhanced UX
 */
 
 $(document).ready(function() {
     
     // --- 1. CONFIG & GLOBALS ---
-    const API_URL = 'http://localhost:3000/api';
-    let currentCarImagePath = ""; // To track image in Edit mode
+    const API_URL = '/api';
+    let currentCarImagePath = ""; 
 
     // --- 2. SHARED UI LOGIC ---
+
+    function hideLoader() {
+        $('.loader-wrapper').addClass('fade-out');
+        setTimeout(() => $('.loader-wrapper').remove(), 500);
+    }
+
+    function showNotification(message, type = 'success') {
+        const toast = $(`
+            <div class="toast-notification ${type}">
+                <i class="bi ${type === 'success' ? 'bi-check-circle' : 'bi-exclamation-circle'} me-2"></i>
+                ${message}
+            </div>
+        `);
+        $('body').append(toast);
+        setTimeout(() => toast.addClass('show'), 100);
+        setTimeout(() => {
+            toast.removeClass('show');
+            setTimeout(() => toast.remove(), 400);
+        }, 3000);
+    }
+
+    // Override default alert
+    window.alert = (msg) => showNotification(msg);
 
     function updateNavbar() {
         const user = JSON.parse(localStorage.getItem('user'));
@@ -32,8 +55,8 @@ $(document).ready(function() {
     $(document).on('click', '#logout-btn', function(e) {
         e.preventDefault();
         localStorage.removeItem('user');
-        alert("Logged out successfully!");
-        window.location.href = 'index.html';
+        showNotification("Logged out successfully!");
+        setTimeout(() => window.location.href = 'index.html', 1000);
     });
 
     // --- 3. CAR DATA LOGIC ---
@@ -46,28 +69,31 @@ $(document).ready(function() {
         const isDashboard = containerId === 'dashboard-list';
 
         if (carsToRender.length === 0) {
-            container.append('<div class="col-12 text-center my-5"><h3>No cars found.</h3></div>');
+            container.append('<div class="col-12 text-center my-5"><h3 class="text-muted">No cars match your criteria.</h3></div>');
             return;
         }
 
-        carsToRender.forEach(car => {
+        carsToRender.forEach((car, index) => {
             const adminButtons = isDashboard ? `
-                <div class="mt-2 pt-2 border-top d-flex gap-2">
-                    <a href="edit-car.html?id=${car.id}" class="btn btn-sm btn-outline-success flex-grow-1"><i class="bi bi-pencil"></i> Edit</a>
+                <div class="mt-3 pt-3 border-top d-flex gap-2">
+                    <a href="edit-car.html?id=${car.id}" class="btn btn-sm btn-outline-primary flex-grow-1"><i class="bi bi-pencil"></i> Edit</a>
                     <button class="btn btn-sm btn-outline-danger delete-car flex-grow-1" data-id="${car.id}"><i class="bi bi-trash"></i> Delete</button>
                 </div>
             ` : '';
 
             const card = `
-                <div class="col-md-4 mb-4 car-item">
-                    <div class="card car-card h-100">
-                        <img src="${car.image}" class="card-img-top" alt="${car.name}">
+                <div class="col-lg-4 col-md-6 mb-4 car-item" style="animation-delay: ${index * 0.1}s">
+                    <div class="card car-card">
+                        <div class="position-relative overflow-hidden">
+                            <img src="${car.image}" class="card-img-top" alt="${car.name}">
+                            <div class="car-badge">${car.brand}</div>
+                        </div>
                         <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">${car.name}</h5>
-                            <p class="card-text text-muted">${car.brand} | ${car.year}</p>
-                            <p class="price-tag mb-3">$${car.price.toLocaleString()}</p>
-                            <div class="mt-auto d-flex justify-content-between">
-                                <a href="car-details.html?id=${car.id}" class="btn btn-primary btn-sm">Details</a>
+                            <h5 class="card-title text-white mb-1">${car.name}</h5>
+                            <p class="small text-muted mb-3">${car.year} | Premium Edition</p>
+                            <p class="price-tag">$${car.price.toLocaleString()}</p>
+                            <div class="mt-auto d-flex justify-content-between gap-2">
+                                <a href="car-details.html?id=${car.id}" class="btn btn-primary btn-sm flex-grow-1">View Details</a>
                                 <button class="btn btn-outline-primary btn-sm add-fav" data-id="${car.id}">
                                     <i class="bi bi-heart"></i>
                                 </button>
@@ -78,7 +104,7 @@ $(document).ready(function() {
                 </div>
             `;
             const $card = $(card);
-            $card.hide().appendTo(container).fadeIn(500);
+            container.append($card);
         });
     }
 
@@ -86,34 +112,52 @@ $(document).ready(function() {
     if ($('#car-list').length || $('#dashboard-list').length) {
         const containerId = $('#car-list').length ? 'car-list' : 'dashboard-list';
         
-        $.get(`${API_URL}/cars`).done(function(cars) {
-            renderCars(cars, containerId);
+        $.get(`${API_URL}/cars`)
+            .done(function(cars) {
+                renderCars(cars, containerId);
+                hideLoader();
 
-            // Live Search
-            $('#search-input').on('keyup', function() {
-                const value = $(this).val().toLowerCase();
-                const filteredCars = cars.filter(car => 
-                    car.name.toLowerCase().indexOf(value) > -1 || 
-                    car.brand.toLowerCase().indexOf(value) > -1
-                );
-                renderCars(filteredCars, containerId);
+                // Live Search with Debounce
+                let timeout = null;
+                $('#search-input').on('keyup', function() {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => {
+                        const value = $(this).val().toLowerCase();
+                        const filteredCars = cars.filter(car => 
+                            car.name.toLowerCase().indexOf(value) > -1 || 
+                            car.brand.toLowerCase().indexOf(value) > -1
+                        );
+                        renderCars(filteredCars, containerId);
+                    }, 300);
+                });
+            })
+            .fail(() => {
+                showNotification("Failed to load car data", "error");
+                hideLoader();
             });
-        });
+    } else {
+        // If no list, just hide loader after a bit
+        setTimeout(hideLoader, 500);
     }
 
     // Car Details Page
     if ($('#car-details-container').length) {
         const urlParams = new URLSearchParams(window.location.search);
         const carId = urlParams.get('id');
-        $.get(`${API_URL}/cars/${carId}`).done(function(car) {
-            $('#car-name').text(car.name);
-            $('#car-price').text(`$${car.price.toLocaleString()}`);
-            $('#car-brand').text(car.brand);
-            $('#car-year').text(car.year);
-            $('#car-description').text(car.description);
-            $('#car-image').attr('src', car.image);
-            $('.add-fav').attr('data-id', car.id);
-        }).fail(() => window.location.href = 'index.html');
+        $.get(`${API_URL}/cars/${carId}`)
+            .done(function(car) {
+                $('#car-name').text(car.name);
+                $('#car-price').text(`$${car.price.toLocaleString()}`);
+                $('#car-brand').text(car.brand);
+                $('#car-year').text(car.year);
+                $('#car-description').text(car.description);
+                $('#car-image').attr('src', car.image);
+                $('.add-fav').attr('data-id', car.id);
+            })
+            .fail(() => {
+                showNotification("Car details not found", "error");
+                setTimeout(() => window.location.href = 'index.html', 2000);
+            });
     }
 
     // Helper: Upload File returning path
@@ -124,24 +168,31 @@ $(document).ready(function() {
         const formData = new FormData();
         formData.append('image', fileInput.files[0]);
 
-        const response = await $.ajax({
-            url: `${API_URL}/upload`,
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false
-        });
-        return response.filePath;
+        try {
+            const response = await $.ajax({
+                url: `${API_URL}/upload`,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false
+            });
+            return response.filePath;
+        } catch (e) {
+            showNotification("Image upload failed", "error");
+            return null;
+        }
     }
 
     // Add Car Form
     $('#add-car-form').on('submit', async function(e) {
         e.preventDefault();
+        const submitBtn = $(this).find('button[type="submit"]');
+        submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Publishing...');
         
         try {
             const imagePath = await uploadImage('car-image-input');
             if (!imagePath) {
-                alert("Please select an image!");
+                submitBtn.prop('disabled', false).text('Publish Listing');
                 return;
             }
 
@@ -161,10 +212,11 @@ $(document).ready(function() {
                 data: JSON.stringify(carData)
             });
 
-            alert("Car added successfully!");
-            window.location.href = 'dashboard.html';
+            showNotification("Car listed successfully! 🔥");
+            setTimeout(() => window.location.href = 'dashboard.html', 1500);
         } catch (err) {
-            alert("Error adding car!");
+            showNotification("Error adding car listing", "error");
+            submitBtn.prop('disabled', false).text('Publish Listing');
         }
     });
 
@@ -178,7 +230,7 @@ $(document).ready(function() {
             $('#edit-car-brand').val(car.brand);
             $('#edit-car-price').val(car.price);
             $('#edit-car-year').val(car.year);
-            currentCarImagePath = car.image; // Keep track of old image
+            currentCarImagePath = car.image; 
             $('#edit-car-desc').val(car.description);
         });
     }
@@ -187,9 +239,10 @@ $(document).ready(function() {
     $('#edit-car-form').on('submit', async function(e) {
         e.preventDefault();
         const carId = $('#edit-car-id').val();
+        const submitBtn = $(this).find('button[type="submit"]');
+        submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Saving...');
         
         try {
-            // Upload new image if selected, otherwise keep old
             let imagePath = await uploadImage('edit-car-image');
             if (!imagePath) imagePath = currentCarImagePath;
 
@@ -209,25 +262,27 @@ $(document).ready(function() {
                 data: JSON.stringify(carData)
             });
 
-            alert("Car updated successfully!");
-            window.location.href = 'dashboard.html';
+            showNotification("Car details updated! ✨");
+            setTimeout(() => window.location.href = 'dashboard.html', 1500);
         } catch (err) {
-            alert("Error updating car!");
+            showNotification("Error updating car", "error");
+            submitBtn.prop('disabled', false).text('Save Changes');
         }
     });
 
     // Delete Car
     $(document).on('click', '.delete-car', function() {
         const carId = $(this).data('id');
-        if (confirm("Are you sure you want to delete this car?")) {
+        if (confirm("Are you sure you want to remove this listing?")) {
+            const row = $(this).closest('.car-item');
             $.ajax({
                 url: `${API_URL}/cars/${carId}`,
                 type: 'DELETE',
                 success: function() {
-                    alert("Car deleted successfully!");
-                    location.reload();
+                    showNotification("Car removed from showroom");
+                    row.fadeOut(500, () => row.remove());
                 },
-                error: (xhr) => alert("Error deleting car: " + xhr.responseJSON.message)
+                error: (xhr) => showNotification("Delete failed: " + xhr.responseJSON.message, "error")
             });
         }
     });
@@ -236,6 +291,9 @@ $(document).ready(function() {
 
     $('#login-form').on('submit', function(e) {
         e.preventDefault();
+        const submitBtn = $(this).find('button[type="submit"]');
+        submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Signing in...');
+
         const credentials = { email: $('#email').val(), password: $('#password').val() };
         $.ajax({
             url: `${API_URL}/login`,
@@ -243,35 +301,46 @@ $(document).ready(function() {
             contentType: 'application/json',
             data: JSON.stringify(credentials),
             success: function(res) {
-                alert("Welcome back!");
+                showNotification(`Welcome back, ${res.user.username}!`);
                 localStorage.setItem('user', JSON.stringify(res.user));
-                window.location.href = 'dashboard.html';
+                setTimeout(() => window.location.href = 'dashboard.html', 1500);
             },
-            error: (xhr) => alert(xhr.responseJSON.message)
+            error: (xhr) => {
+                showNotification(xhr.responseJSON?.message || "Login failed", "error");
+                submitBtn.prop('disabled', false).text('Login');
+            }
         });
     });
 
     $('#register-form').on('submit', function(e) {
         e.preventDefault();
+        const submitBtn = $(this).find('button[type="submit"]');
+        if ($('#password').val() !== $('#confirm-password').val()) {
+            showNotification("Passwords mismatch!", "error");
+            return;
+        }
+
+        submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Creating account...');
+
         const userData = {
             username: $('#username').val(),
             email: $('#email').val(),
             password: $('#password').val()
         };
-        if ($('#password').val() !== $('#confirm-password').val()) {
-            alert("Passwords mismatch!");
-            return;
-        }
+
         $.ajax({
             url: `${API_URL}/register`,
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(userData),
             success: function() {
-                alert("Registration complete! Please login.");
-                window.location.href = 'login.html';
+                showNotification("Account created successfully! ✨");
+                setTimeout(() => window.location.href = 'login.html', 2000);
             },
-            error: (xhr) => alert(xhr.responseJSON.message)
+            error: (xhr) => {
+                showNotification(xhr.responseJSON?.message || "Registration failed", "error");
+                submitBtn.prop('disabled', false).text('Register');
+            }
         });
     });
 
@@ -280,8 +349,10 @@ $(document).ready(function() {
     $('#book-now-btn').on('click', () => $('#booking-modal').modal('show'));
 
     $(document).on('click', '.add-fav', function() {
-        $(this).toggleClass('btn-outline-primary btn-danger');
+        $(this).toggleClass('btn-outline-primary active');
+        const isFav = $(this).hasClass('active');
         $(this).find('i').toggleClass('bi-heart bi-heart-fill');
+        showNotification(isFav ? "Added to favorites" : "Removed from favorites");
     });
 
 });

@@ -3,20 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CarZone | Modern Online Showroom</title>
+    <title>CarZone | Premium Online Showroom</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+    <!-- Premium Loader -->
+    <div class="loader-wrapper">
+        <div class="loader"></div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
             <a class="navbar-brand" href="index.html">
                 <i class="bi bi-car-front-fill me-2"></i>CarZone
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <i class="bi bi-list fs-1 text-white"></i>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
@@ -31,37 +36,44 @@
                     <a href="login.html" class="btn btn-outline-primary me-2">Login</a>
                     <a href="register.html" class="btn btn-primary">Register</a>
                 </div>
-                <div id="user-links" class="d-flex d-none">
-                    <span class="navbar-text me-3">Hello, <strong id="username-display">User</strong></span>
+                <div id="user-links" class="d-flex d-none align-items-center">
+                    <span class="navbar-text me-3">Welcome, <strong id="username-display">User</strong></span>
                     <a href="dashboard.html" class="btn btn-outline-primary me-2">Dashboard</a>
-                    <a href="#" id="logout-btn" class="btn btn-danger">Logout</a>
+                    <a href="#" id="logout-btn" class="btn btn-outline-danger">Logout</a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <header class="hero-section text-center">
-        <div class="container">
-            <h1 class="display-4 fw-bold">Find Your Dream Car</h1>
-            <p class="lead">Explore the best collection of modern luxury and performance cars.</p>
+    <header class="hero-section">
+        <div class="container animate__animated animate__fadeIn">
+            <h1 class="display-1 fw-bold">Find Your <span class="text-primary">Dream</span> Car</h1>
+            <p class="lead mx-auto">Explore the most exclusive collection of modern luxury and high-performance vehicles, curated for the elite.</p>
         </div>
     </header>
 
     <div class="container">
-        <div class="search-wrapper d-flex align-items-center px-3">
-            <i class="bi bi-search text-muted"></i>
-            <input type="text" id="search-input" class="form-control" placeholder="Search by name or brand (e.g. Tesla, BMW)...">
+        <div class="search-wrapper">
+            <i class="bi bi-search text-muted fs-4"></i>
+            <input type="text" id="search-input" class="form-control" placeholder="Search by name, brand, or style...">
         </div>
     </div>
 
-    <main class="container mb-5">
+    <main class="container mb-5 pb-5">
         <div class="row" id="car-list">
+            <!-- Cars populated by script.js -->
         </div>
     </main>
 
-    <footer class="bg-white py-4 mt-5 border-top">
+    <footer class="mt-5">
         <div class="container text-center">
-            <p class="text-muted mb-0">&copy; 2026 CarZone – University Student Project</p>
+            <h3 class="fw-bold mb-4">CarZone</h3>
+            <div class="d-flex justify-content-center gap-4 mb-4">
+                <a href="#" class="text-muted fs-4"><i class="bi bi-facebook"></i></a>
+                <a href="#" class="text-muted fs-4"><i class="bi bi-twitter-x"></i></a>
+                <a href="#" class="text-muted fs-4"><i class="bi bi-instagram"></i></a>
+            </div>
+            <p class="text-muted mb-0 small">&copy; 2026 CarZone – Advanced University Project</p>
         </div>
     </footer>
 
